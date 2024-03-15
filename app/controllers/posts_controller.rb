@@ -20,6 +20,13 @@ class PostsController < ApplicationController
 
   # GET /posts/1/edit
   def edit
+    @user_id = session[:user_id]
+    begin
+      @post = Post.post_owner(@user_id).find(params[:id])
+    rescue ActiveRecord::RecordNotFound => e
+      flash[:alert] = "You are not authorized to edit/update this post."
+      redirect_to posts_path
+    end
   end
 
   # POST /posts or /posts.json
@@ -40,24 +47,41 @@ class PostsController < ApplicationController
 
   # PATCH/PUT /posts/1 or /posts/1.json
   def update
-    respond_to do |format|
-      if @post.update(post_params)
-        format.html { redirect_to post_url(@post), notice: "Post was successfully updated." }
-        format.json { render :show, status: :ok, location: @post }
+    @user_id = session[:user_id]
+      begin
+        if @post.id = Post.post_owner(@user_id).find(@post.id).id
+        then @post.update(post_params)
+          respond_to do |format|
+            format.html { redirect_to post_url(@post), notice: "Post was successfully updated." }
+            format.json { render :show, status: :ok, location: @post }
+      rescue ActiveRecord::RecordNotFound => e
+        flash[:alert] = "You are not authorized to edit/update this post."
+        redirect_to posts_path
       else
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @post.errors, status: :unprocessable_entity }
       end
     end
   end
+  end
 
   # DELETE /posts/1 or /posts/1.json
   def destroy
-    @post.destroy
-
-    respond_to do |format|
-      format.html { redirect_to posts_url, notice: "Post was successfully destroyed." }
-      format.json { head :no_content }
+    @user_id = session[:user_id]
+    begin
+      if @post.id = Post.post_owner(@user_id).find(params[:id]).id
+      then @post.destroy
+      respond_to do |format|
+        format.html { redirect_to posts_url, notice: "Post was successfully destroyed." }
+        format.json { head :no_content }
+    rescue ActiveRecord::RecordNotFound => e
+      flash[:alert] = "You are not authorized to edit/update this post."
+      redirect_to posts_path
+    else 
+      format.html { render :edit, status: :unprocessable_entity }
+      format.json { render json: @post.errors, status: :unprocessable_entity }
+    end
+      end
     end
   end
 
@@ -71,4 +95,5 @@ class PostsController < ApplicationController
     def post_params
       params.require(:post).permit(:title, :body, :user_id)
     end
+
 end
