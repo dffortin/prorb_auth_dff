@@ -13,3 +13,6 @@
 4. Show the details of a specific posts
 5. If not logged in, user can only see posts but not edit them
 # prorb_auth_dff
+
+15-Mar-2024
+Added scope post_owner and modified PostsController [edit, update and destroy] actions to use scope. Added flash message to each as well.
